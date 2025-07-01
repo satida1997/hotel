@@ -47,6 +47,13 @@
     input:focus, select:focus {
       transition: all 0.2s ease-in-out;
     }
+    /* Alternating row colors for better readability */
+    .record-item-odd {
+      background-color: #FDF8F0; /* Very light cream */
+    }
+    .record-item-even {
+      background-color: #F8F0E3; /* Slightly darker cream (same as body background) */
+    }
   </style>
 </head>
 <body>
@@ -147,17 +154,18 @@
         section.className = "mb-4 pb-2 border-b border-[#EADBC8] last:border-b-0"; 
         section.innerHTML = `<div class="font-bold text-[#D2691E] text-lg mb-2">${date}</div>`; 
 
-        grouped[date].forEach(row => {
+        grouped[date].forEach((row, i) => { // Added index 'i' for alternating colors
           const item = document.createElement("div");
-          item.className = "flex justify-between items-center py-2"; 
+          // Apply alternating background colors and adjust padding/rounding
+          const rowClass = i % 2 === 0 ? 'record-item-even' : 'record-item-odd';
+          item.className = `flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 px-3 rounded-lg ${rowClass}`;
           const amountClass = row.amount >= 0 ? 'text-[#8B4513]' : 'text-[#E91E63]'; /* Cookie Run colors */
           const amountSign = row.amount >= 0 ? '+' : '';
 
           item.innerHTML = `
-            <span class="text-gray-800 text-base font-medium flex-auto min-w-0 truncate mr-2">• ${row.description}</span>
-            <div class="flex items-center">
-              <span class="${amountClass} font-semibold mr-3">${amountSign}${row.amount.toLocaleString()} บาท</span>
-              <!-- Removed Edit Button as per user request -->
+            <span class="text-gray-800 text-sm md:text-base font-medium mr-2 mb-1 sm:mb-0">• ${row.description}</span>
+            <div class="flex items-center flex-shrink-0 self-end sm:self-center">
+              <span class="${amountClass} font-semibold text-xs md:text-base mr-3">${amountSign}${row.amount.toLocaleString()} บาท</span>
               <button onclick="deleteRecordByValue('${row.description.replace(/'/g, "\\'")}', ${row.amount}, '${row.date}', ${row.timestamp})" class="text-gray-500 hover:text-[#E91E63] transition duration-150 ease-in-out p-1 rounded-full hover:bg-[#FCE4EC] ml-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z" clip-rule="evenodd"/>
