@@ -49,7 +49,7 @@
     }
   </style>
 </head>
-<body class="p-6">
+<body>
   <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-2xl p-6 md:p-10 border border-[#F0EAD6]">
     <h1 class="text-4xl text-[#D2691E] font-extrabold text-center mb-8 tracking-wide">
       <span class="animate-pulse inline-block">🍪</span> Franck&sa Family <span class="animate-pulse inline-block">🍪</span>
@@ -114,25 +114,68 @@
     const submitBtn = document.getElementById("submitBtn");
     let currentType = "income";
     
-    let editModeData = null; 
+    // Removed editModeData as edit functionality is removed
+    // let editModeData = null; 
     let incomeExpenseChart = null;
 
-    incomeBtn.onclick = () => {
-      currentType = "income";
-      incomeBtn.classList.add("active-btn");
-      expenseBtn.classList.remove("active-btn");
-      resetForm(); 
-    };
-    expenseBtn.onclick = () => {
-      currentType = "expense";
-      expenseBtn.classList.add("active-btn");
-      incomeBtn.classList.remove("active-btn");
-      resetForm(); 
-    };
+    // Moved fetchData to the top for better scope and availability
+    async function fetchData() {
+      const res = await fetch(scriptUrl + '?t=' + new Date().getTime()); 
+      const data = await res.json();
 
-    document.getElementById("amount").addEventListener("input", function () {
-      this.value = this.value.replace(/-/g, ""); 
-    });
+      let totalIncome = 0, totalExpense = 0;
+      const list = document.getElementById("recordList");
+      list.innerHTML = ""; 
+
+      const grouped = {};
+      data.forEach((row) => { 
+        const dateOnly = toThaiDate(row.date);
+        if (!grouped[dateOnly]) grouped[dateOnly] = [];
+        grouped[dateOnly].push({ 
+          description: row.description, 
+          amount: row.amount, 
+          date: row.date,
+          timestamp: row.timestamp 
+        }); 
+
+        if (row.amount >= 0) totalIncome += row.amount;
+        else totalExpense += row.amount;
+      });
+
+      Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
+        const section = document.createElement("div");
+        section.className = "mb-4 pb-2 border-b border-[#EADBC8] last:border-b-0"; 
+        section.innerHTML = `<div class="font-bold text-[#D2691E] text-lg mb-2">${date}</div>`; 
+
+        grouped[date].forEach(row => {
+          const item = document.createElement("div");
+          item.className = "flex justify-between items-center py-2"; 
+          const amountClass = row.amount >= 0 ? 'text-[#8B4513]' : 'text-[#E91E63]'; /* Cookie Run colors */
+          const amountSign = row.amount >= 0 ? '+' : '';
+
+          item.innerHTML = `
+            <span class="text-gray-800 text-base font-medium flex-auto min-w-0 truncate mr-2">• ${row.description}</span>
+            <div class="flex items-center">
+              <span class="${amountClass} font-semibold mr-3">${amountSign}${row.amount.toLocaleString()} บาท</span>
+              <!-- Removed Edit Button as per user request -->
+              <button onclick="deleteRecordByValue('${row.description.replace(/'/g, "\\'")}', ${row.amount}, '${row.date}', ${row.timestamp})" class="text-gray-500 hover:text-[#E91E63] transition duration-150 ease-in-out p-1 rounded-full hover:bg-[#FCE4EC] ml-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z" clip-rule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+          `;
+          section.appendChild(item);
+        });
+        list.appendChild(section);
+      });
+
+      document.getElementById("totalIncome").textContent = `฿${totalIncome.toLocaleString()}`;
+      document.getElementById("totalExpense").textContent = `฿${Math.abs(totalExpense).toLocaleString()}`;
+      document.getElementById("balance").textContent = `฿${(totalIncome + totalExpense).toLocaleString()}`;
+
+      renderChart(totalIncome, totalExpense);
+    }
 
     function toThaiDate(dateStr) {
       const d = new Date(dateStr);
@@ -166,26 +209,12 @@
       amount = amount.replace(/-/g, "");
       const finalAmount = currentType === "income" ? parseFloat(amount) : -parseFloat(amount);
       
-      let payload = {};
-      if (editModeData) { 
-        payload = {
-          action: "edit", 
-          description: `[${category}] ${description}`,
-          amount: finalAmount,
-          date: date,
-          originalDescription: editModeData.description, 
-          originalAmount: editModeData.amount,
-          originalDate: editModeData.date,
-          originalTimestamp: editModeData.timestamp 
-        };
-      } else { 
-        payload = {
-          action: "add", 
-          description: `[${category}] ${description}`,
-          amount: finalAmount,
-          date: date
-        };
-      }
+      let payload = {
+        action: "add",  // Always add, as edit functionality is removed
+        description: `[${category}] ${description}`,
+        amount: finalAmount,
+        date: date
+      };
 
       submitBtn.disabled = true;
       submitBtn.textContent = "⏳ กำลังบันทึก...";
@@ -211,11 +240,6 @@
     }
 
     async function deleteRecordByValue(description, amount, date, timestamp) {
-      // Use a custom modal or Toastify for confirmation instead of window.confirm()
-      // For simplicity in this example, we'll use a basic Toastify for immediate feedback
-      // In a real app, you'd implement a more robust modal for user confirmation.
-      // if (!confirm("คุณต้องการลบรายการนี้จริงหรือไม่?")) return; // REMOVED: Do not use window.confirm()
-
       Toastify({
         text: "🗑️ กำลังลบรายการ...",
         duration: 1500,
@@ -311,68 +335,8 @@
       });
     }
 
-    async function fetchData() {
-      const res = await fetch(scriptUrl + '?t=' + new Date().getTime()); 
-      const data = await res.json();
-
-      let totalIncome = 0, totalExpense = 0;
-      const list = document.getElementById("recordList");
-      list.innerHTML = ""; 
-
-      const grouped = {};
-      data.forEach((row) => { 
-        const dateOnly = toThaiDate(row.date);
-        if (!grouped[dateOnly]) grouped[dateOnly] = [];
-        grouped[dateOnly].push({ 
-          description: row.description, 
-          amount: row.amount, 
-          date: row.date,
-          timestamp: row.timestamp 
-        }); 
-
-        if (row.amount >= 0) totalIncome += row.amount;
-        else totalExpense += row.amount;
-      });
-
-      Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
-        const section = document.createElement("div");
-        section.className = "mb-4 pb-2 border-b border-[#EADBC8] last:border-b-0"; 
-        section.innerHTML = `<div class="font-bold text-[#D2691E] text-lg mb-2">${date}</div>`; 
-
-        grouped[date].forEach(row => {
-          const item = document.createElement("div");
-          item.className = "flex justify-between items-center py-2"; 
-          const amountClass = row.amount >= 0 ? 'text-[#8B4513]' : 'text-[#E91E63]'; /* Cookie Run colors */
-          const amountSign = row.amount >= 0 ? '+' : '';
-
-          item.innerHTML = `
-            <span class="text-gray-800 text-base font-medium flex-auto min-w-0 truncate mr-2">• ${row.description}</span>
-            <div class="flex items-center">
-              <span class="${amountClass} font-semibold mr-3">${amountSign}${row.amount.toLocaleString()} บาท</span>
-              <button onclick="editRecordByValue('${row.description.replace(/'/g, "\\'")}', ${row.amount}, '${row.date}', ${row.timestamp})" class="text-gray-500 hover:text-[#DAA06D] transition duration-150 ease-in-out p-1 rounded-full hover:bg-[#F0EAD6]">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-3.109 9.563l-2.093.748.748-2.093 7.842-7.842 1.345 1.345-7.842 7.842z"/>
-                </svg>
-              </button>
-              <button onclick="deleteRecordByValue('${row.description.replace(/'/g, "\\'")}', ${row.amount}, '${row.date}', ${row.timestamp})" class="text-gray-500 hover:text-[#E91E63] transition duration-150 ease-in-out p-1 rounded-full hover:bg-[#FCE4EC] ml-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z" clip-rule="evenodd"/>
-                </svg>
-              </button>
-            </div>
-          `;
-          section.appendChild(item);
-        });
-        list.appendChild(section);
-      });
-
-      document.getElementById("totalIncome").textContent = `฿${totalIncome.toLocaleString()}`;
-      document.getElementById("totalExpense").textContent = `฿${Math.abs(totalExpense).toLocaleString()}`;
-      document.getElementById("balance").textContent = `฿${(totalIncome + totalExpense).toLocaleString()}`;
-
-      renderChart(totalIncome, totalExpense);
-    }
-
+    // Removed editRecordByValue function as it's no longer used
+    /*
     async function editRecordByValue(description, amount, date, timestamp) {
         document.getElementById("description").value = description.replace(/\[.*?\]\s?/, "");
         document.getElementById("amount").value = Math.abs(amount);
@@ -408,10 +372,11 @@
           close: true,
           gravity: "top", 
           position: "center", 
-          backgroundColor: "linear-gradient(to right, #DAA06D, #B07B4C)", /* Cookie Run Brown */
+          backgroundColor: "linear-gradient(to right, #DAA06D, #B07B4C)",
           stopOnFocus: true,
         }).showToast();
     }
+    */
 
     function resetForm() {
       document.getElementById("description").value = "";
@@ -419,7 +384,8 @@
       document.getElementById("date").value = "";
       document.getElementById("category").value = "อาหาร"; 
       submitBtn.textContent = "🍪 บันทึกรายการ";
-      editModeData = null; 
+      // Removed editModeData as edit functionality is removed
+      // editModeData = null; 
     }
 
     document.addEventListener("DOMContentLoaded", fetchData);
