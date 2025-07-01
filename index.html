@@ -121,8 +121,6 @@
     const submitBtn = document.getElementById("submitBtn");
     let currentType = "income";
     
-    // Removed editModeData as edit functionality is removed
-    // let editModeData = null; 
     let incomeExpenseChart = null;
 
     // Moved fetchData to the top for better scope and availability
@@ -142,11 +140,19 @@
           description: row.description, 
           amount: row.amount, 
           date: row.date,
-          timestamp: row.timestamp 
+          timestamp: row.timestamp,
+          type: row.type // Ensure 'type' is read from fetched data
         }); 
 
-        if (row.amount >= 0) totalIncome += row.amount;
-        else totalExpense += row.amount;
+        // Calculate totals based on 'type' if available, otherwise use amount sign
+        if (row.type === 'income') {
+          totalIncome += Math.abs(row.amount);
+        } else if (row.type === 'expense') {
+          totalExpense -= Math.abs(row.amount); // Subtract for expense
+        } else { // Fallback for old data without 'type'
+          if (row.amount >= 0) totalIncome += row.amount;
+          else totalExpense += row.amount;
+        }
       });
 
       Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a)).forEach(date => {
@@ -159,13 +165,16 @@
           // Apply alternating background colors and adjust padding/rounding
           const rowClass = i % 2 === 0 ? 'record-item-even' : 'record-item-odd';
           item.className = `flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 px-3 rounded-lg ${rowClass}`;
-          const amountClass = row.amount >= 0 ? 'text-[#8B4513]' : 'text-[#E91E63]'; /* Cookie Run colors */
-          const amountSign = row.amount >= 0 ? '+' : '';
+          
+          // Determine class and sign based on 'type'
+          const isIncome = row.type === 'income'; // Strictly use 'type' for display
+          const amountClass = isIncome ? 'text-[#8B4513]' : 'text-[#E91E63]'; /* Cookie Run colors */
+          const amountSign = isIncome ? '+' : '-'; // Always show '-' for expense
 
           item.innerHTML = `
             <span class="text-gray-800 text-sm md:text-base font-medium mr-2 mb-1 sm:mb-0">• ${row.description}</span>
             <div class="flex items-center flex-shrink-0 self-end sm:self-center">
-              <span class="${amountClass} font-semibold text-xs md:text-base mr-3">${amountSign}${row.amount.toLocaleString()} บาท</span>
+              <span class="${amountClass} font-semibold text-xs md:text-base mr-3">${amountSign}${Math.abs(row.amount).toLocaleString()} บาท</span>
               <button onclick="deleteRecordByValue('${row.description.replace(/'/g, "\\'")}', ${row.amount}, '${row.date}', ${row.timestamp})" class="text-gray-500 hover:text-[#E91E63] transition duration-150 ease-in-out p-1 rounded-full hover:bg-[#FCE4EC] ml-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 11-2 0v6a1 1 0 112 0V8z" clip-rule="evenodd"/>
@@ -215,13 +224,15 @@
       }
 
       amount = amount.replace(/-/g, "");
-      const finalAmount = currentType === "income" ? parseFloat(amount) : -parseFloat(amount);
+      // Always send amount as a positive number. The 'type' field will determine if it's income or expense.
+      const finalAmount = parseFloat(amount); 
       
       let payload = {
-        action: "add",  // Always add, as edit functionality is removed
+        action: "add", 
         description: `[${category}] ${description}`,
-        amount: finalAmount,
-        date: date
+        amount: finalAmount, // Amount is now always positive
+        date: date,
+        type: currentType // Explicitly send 'income' or 'expense'
       };
 
       submitBtn.disabled = true;
@@ -343,57 +354,12 @@
       });
     }
 
-    // Removed editRecordByValue function as it's no longer used
-    /*
-    async function editRecordByValue(description, amount, date, timestamp) {
-        document.getElementById("description").value = description.replace(/\[.*?\]\s?/, "");
-        document.getElementById("amount").value = Math.abs(amount);
-        document.getElementById("date").value = toThaiDate(date);
-        
-        const categoryMatch = description.match(/\[(.*?)\]/);
-        if (categoryMatch && categoryMatch[1]) {
-          document.getElementById("category").value = categoryMatch[1];
-        } else {
-          document.getElementById("category").value = "อื่นๆ"; 
-        }
-        
-        editModeData = {
-          description: description,
-          amount: amount,
-          date: date,
-          timestamp: timestamp 
-        };
-        
-        currentType = amount >= 0 ? "income" : "expense";
-        if (currentType === "income") {
-          incomeBtn.classList.add("active-btn");
-          expenseBtn.classList.remove("active-btn");
-        } else {
-          expenseBtn.classList.add("active-btn");
-          incomeBtn.classList.remove("active-btn");
-        }
-        submitBtn.textContent = "💾 อัปเดตรายการ";
-        
-        Toastify({
-          text: "✏️ กำลังแก้ไขรายการ...",
-          duration: 2000,
-          close: true,
-          gravity: "top", 
-          position: "center", 
-          backgroundColor: "linear-gradient(to right, #DAA06D, #B07B4C)",
-          stopOnFocus: true,
-        }).showToast();
-    }
-    */
-
     function resetForm() {
       document.getElementById("description").value = "";
       document.getElementById("amount").value = "";
       document.getElementById("date").value = "";
       document.getElementById("category").value = "อาหาร"; 
       submitBtn.textContent = "🍪 บันทึกรายการ";
-      // Removed editModeData as edit functionality is removed
-      // editModeData = null; 
     }
 
     document.addEventListener("DOMContentLoaded", fetchData);
