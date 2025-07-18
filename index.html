@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>กระแกร่ง Food&Bakery</title>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SweetAlert2 CDN -->
@@ -178,19 +178,18 @@
 <body class="bg-gray-100 min-h-screen pb-32 text-base md:text-lg"> 
 
     <!-- Header Section with Navigation -->
-    <header class="header-sticky bg-white shadow-md p-4 flex justify-between items-center px-4 md:px-8">
-        <!-- Adjusted h1 font size for responsiveness -->
-        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">กระแกร่ง Food&Bakery</h1>
-        <!-- Navigation Links - increased padding for better touch target -->
-        <nav class="flex space-x-4 md:space-x-6">
-            <a href="#" class="text-blue-600 hover:text-blue-800 text-lg font-medium transition duration-200 py-2 px-3 rounded-md" onclick="window.location.reload(); return false;">หน้าหลัก</a>
-            <!-- ปุ่มตะกร้าใน Header - increased padding for better touch target -->
-            <a href="#" onclick="showCartModal(); return false;" class="text-blue-600 hover:text-blue-800 text-lg font-medium transition duration-200 flex items-center py-2 px-3 rounded-md">
-                <i class="fas fa-shopping-cart mr-2 text-xl"></i> ตะกร้า <span id="headerCartItemCount" class="ml-1 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full" style="display:none;">0</span>
-            </a>
-        </nav>
-    </header>
 
+<header class="header-sticky bg-white shadow-md flex justify-between items-center px-4 md:px-8 py-4">
+  <!-- โลโก้ซ้ายสุด -->
+  <img src="https://i.postimg.cc/sgrzrM9t/S-2637831.jpg" alt="โลโก้ร้านกระแกร่ง" class="h-16 sm:h-20 md:h-24 object-contain">
+
+  <!-- ปุ่มตะกร้าฝั่งขวา -->
+  <button onclick="showCartModal()" class="relative flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full transition duration-200">
+    <i class="fas fa-shopping-cart text-xl mr-2"></i>
+    <span>ตะกร้า</span>
+    <span id="headerCartItemCount" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full hidden">0</span>
+  </button>
+</header>
     <div class="container mx-auto p-4 md:p-8 pt-10">
         <div class="text-center mb-10">
             <h2 class="text-2xl md:text-3xl font-semibold text-gray-700">เมนูอาหารและเครื่องดื่ม</h2>
@@ -318,6 +317,14 @@
             {
                 id: 10,
                 name: "ข้าวเหนียวมูน",
+                description: "ข้าวเหนียวมูนนุ่มๆ หอมกะทิ",
+                price: 99,
+                image: "https://i.postimg.cc/yYmqXSZs/image.jpg", 
+                category: "ของหวาน"
+            },
+{
+                id: 11,
+                name: "ข้าวเหนียวมูน2",
                 description: "ข้าวเหนียวมูนนุ่มๆ หอมกะทิ",
                 price: 99,
                 image: "https://i.postimg.cc/yYmqXSZs/image.jpg", 
