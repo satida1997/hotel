@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SweetAlert2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Sarabun Font for Thai -->
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -174,16 +170,11 @@
         }
     </style>
 </head>
-<!-- Adjusted body padding-bottom for larger floating cart -->
 <body class="bg-gray-100 min-h-screen pb-32 text-base md:text-lg"> 
 
-    <!-- Header Section with Navigation -->
-
-<header class="header-sticky bg-white shadow-md flex justify-between items-center px-4 md:px-8 py-4">
-  <!-- โลโก้ซ้ายสุด -->
+    <header class="header-sticky bg-white shadow-md flex justify-between items-center px-4 md:px-8 py-4">
   <img src="https://i.postimg.cc/sgrzrM9t/S-2637831.jpg" alt="โลโก้ร้านกระแกร่ง" class="h-16 sm:h-20 md:h-24 object-contain">
 
-  <!-- ปุ่มตะกร้าฝั่งขวา -->
   <button onclick="showCartModal()" class="relative flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-full transition duration-200">
     <i class="fas fa-shopping-cart text-xl mr-2"></i>
     <span>ตะกร้า</span>
@@ -196,7 +187,6 @@
             <p class="text-gray-500 mt-2">เลือกเมนูโปรดของคุณ แล้วกดเพิ่มลงตะกร้า</p>
         </div>
 
-        <!-- Search Bar - Adjusted padding for input and buttons -->
         <div class="flex flex-col sm:flex-row justify-center items-center gap-3 mb-8">
             <div class="relative w-full max-w-md">
                 <input type="text" id="searchInput" placeholder="ค้นหาเมนู..." class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-full focus:ring-blue-500 focus:border-blue-500 shadow-sm text-base">
@@ -207,31 +197,24 @@
                     <i class="fas fa-times-circle text-xl"></i>
                 </button>
             </div>
-            <!-- ปุ่มค้นหา (เผื่อมีคนอยากกดหลังจากพิมพ์เสร็จ) -->
             <button id="searchButton" class="px-5 py-3 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700 transition duration-200 w-full sm:w-auto text-base">
                 ค้นหา
             </button>
         </div>
 
-        <!-- Category Filter Buttons - Adjusted padding and font size -->
         <div class="flex flex-wrap justify-center gap-3 mb-8">
             <button class="filter-button px-5 py-3 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-200 active text-base sm:text-lg" data-category="all">ทั้งหมด</button>
             <button class="filter-button px-5 py-3 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-200 text-base sm:text-lg" data-category="อาหารจานเดียว">อาหารจานเดียว</button>
             <button class="filter-button px-5 py-3 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-200 text-base sm:text-lg" data-category="เครื่องดื่ม">เครื่องดื่ม</button>
             <button class="filter-button px-5 py-3 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 transition duration-200 text-base sm:text-lg" data-category="ของหวาน">ของหวาน</button>
-            <!-- Add more category buttons here as needed -->
-        </div>
+            </div>
 
-        <!-- Menu Items Grid - Changed to grid-cols-1 for single column layout on all screens -->
-        <div id="menu-items-container" class="grid grid-cols-1 gap-6">
-            <!-- Menu items will be dynamically loaded here by JavaScript -->
-        </div>
+        <div id="menu-items-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
     </div>
 
-    <!-- Floating Cart Button - Adjusted for full width and larger size -->
     <button id="floatingCartBtn" class="floating-cart bg-blue-600 text-white font-bold hover:bg-blue-700 transition duration-300 transform scale-100 hover:scale-105" onclick="showCartModal()">
-        <i class="fas fa-shopping-cart mr-3 text-3xl"></i> <!-- Increased icon size to text-3xl and adjusted margin -->
-        <span id="cartItemCount" class="item-count">0</span>
+        <i class="fas fa-shopping-cart mr-3 text-3xl"></i> <span id="cartItemCount" class="item-count">0</span>
         ตะกร้า <span id="cartTotalPrice">0</span> บาท
     </button>
 
@@ -690,7 +673,7 @@
                     if (deliveryMethod === 'delivery' && !deliveryAddress) {
                         Swal.showValidationMessage('กรุณาระบุที่อยู่จัดส่งสำหรับ "จัดส่ง"');
                         return false;
-                    }
+                     }
                      if (deliveryMethod === 'dinein' && !deliveryAddress) {
                         Swal.showValidationMessage('กรุณาระบุโต๊ะที่สำหรับ "ทานที่ร้าน"');
                         return false;
